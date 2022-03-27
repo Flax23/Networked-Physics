@@ -20,10 +20,11 @@ public class PlayerController : MonoBehaviour
     public bool isOnGround = true;
     private float forwardInput;
     private float horizontalInput;
+    private Color cubeStartColor = new Color(43, 41, 41, 1);
 
     void Start()
     {
-        cubeRb = GetComponent<Rigidbody>();
+        cubeRb = GetComponent<Rigidbody>();      
         Physics.gravity *= gravityModifier;
     }
 
@@ -44,10 +45,20 @@ public class PlayerController : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-
         if (collision.gameObject.CompareTag("Ground"))
         {
             isOnGround = true;
         }
+
+        if (collision.gameObject.CompareTag("Cube"))
+        {
+            collision.gameObject.GetComponent<MeshRenderer>().material.color = Color.red;
+            StartCoroutine(CubeRedCountdownRoutine(collision.gameObject.transform));
+        }
+    }
+    IEnumerator CubeRedCountdownRoutine(Transform Cube)
+    {
+        yield return new WaitForSeconds(3);
+        Cube.GetComponent<MeshRenderer>().material.color = Color.gray;
     }
 }
