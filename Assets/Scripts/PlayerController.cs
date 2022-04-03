@@ -10,7 +10,7 @@ public class PlayerController : MonoBehaviour
     [Range(0, 100)]
     [SerializeField]
     private float gravityModifier;
-    [Range(0, 100)]
+    [Range(0, 5000)]
     [SerializeField]
     private float jumpForce;
     [Range(0, 100)]
@@ -33,8 +33,8 @@ public class PlayerController : MonoBehaviour
         forwardInput = Input.GetAxis("Vertical");
         horizontalInput = Input.GetAxis("Horizontal");
 
-        cubeRb.AddForce(Vector3.forward * cubeSpeed * forwardInput);
-        cubeRb.AddForce(Vector3.right * cubeSpeed * horizontalInput);
+        cubeRb.AddForce(Vector3.forward * cubeSpeed * forwardInput, ForceMode.Impulse);
+        cubeRb.AddForce(Vector3.right * cubeSpeed * horizontalInput, ForceMode.Impulse);
 
         if (Input.GetKeyDown(KeyCode.Space) && isOnGround)
         {
@@ -53,9 +53,10 @@ public class PlayerController : MonoBehaviour
         if (collision.gameObject.CompareTag("Cube"))
         {
             collision.gameObject.GetComponent<MeshRenderer>().material.color = Color.red;
-            StartCoroutine(CubeRedCountdownRoutine(collision.gameObject.transform));
+            StartCoroutine(CubeRedCountdownRoutine(collision.gameObject.transform));           
         }
     }
+
     IEnumerator CubeRedCountdownRoutine(Transform Cube)
     {
         yield return new WaitForSeconds(3);
