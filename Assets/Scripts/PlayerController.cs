@@ -1,8 +1,10 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 {
     private Rigidbody cubeRb;
 
@@ -17,6 +19,13 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private float cubeSpeed;
 
+    public Text inputInfo;
+    public bool z = false;
+    public bool left = false;
+    public bool right = false;
+    public bool up = false;
+    public bool down = false;
+    public bool space = false;
     public bool isOnGround = true;
     private float forwardInput;
     private float horizontalInput;
@@ -35,12 +44,29 @@ public class PlayerController : MonoBehaviour
 
         cubeRb.AddForce(Vector3.forward * cubeSpeed * forwardInput, ForceMode.Impulse);
         cubeRb.AddForce(Vector3.right * cubeSpeed * horizontalInput, ForceMode.Impulse);
+           
+        if (Input.GetKey(KeyCode.Space)) space = true;
+        else if (!Input.GetKey(KeyCode.Space) && photonView.IsMine == true) space = false;
 
-        if (Input.GetKeyDown(KeyCode.Space) && isOnGround)
+        if (Input.GetKey(KeyCode.Z)) z = true;
+        else if (!Input.GetKey(KeyCode.Z) && photonView.IsMine == true) z = false;
+
+        if (horizontalInput < 0 && photonView.IsMine == true) { left = true; right = false; }
+        else if (horizontalInput > 0 && photonView.IsMine == true) { left = false; right = true; }
+        else if (horizontalInput == 0 && photonView.IsMine == true) { left = false; right = false; }
+
+        if (forwardInput < 0 && photonView.IsMine == true) { down = true; up = false; }
+        else if (forwardInput > 0 && photonView.IsMine == true) { down = false; up = true; }
+        else if (forwardInput == 0 && photonView.IsMine == true) { down = false; up = false; }
+
+        if (space && isOnGround)
         {
             cubeRb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
             isOnGround = false;
         }
+
+        inputInfo.text = "Z - " + z + "\nLeft - " + left + "\nRight - " + right + "\nUp - " + up + "\nDown - " + down +
+            "\nSpace - " + space;
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -62,4 +88,35 @@ public class PlayerController : MonoBehaviour
         yield return new WaitForSeconds(3);
         Cube.GetComponent<MeshRenderer>().material.color = Color.gray;
     }
+
+    #region IPunObservable implementation
+
+
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.IsWriting)
+        {
+            // We own this player: send the others our data
+            stream.SendNext(z);
+            stream.SendNext(left);
+            stream.SendNext(right);
+            stream.SendNext(up);
+            stream.SendNext(down);
+            stream.SendNext(space);
+
+        }
+        else
+        {
+            // Network player, receive data
+            this.z = (bool)stream.ReceiveNext();
+            this.left = (bool)stream.ReceiveNext();
+            this.right = (bool)stream.ReceiveNext();
+            this.up = (bool)stream.ReceiveNext();
+            this.down = (bool)stream.ReceiveNext();
+            this.space = (bool)stream.ReceiveNext();
+        }
+    }
+
+
+    #endregion
 }
