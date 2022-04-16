@@ -15,7 +15,6 @@ GameObject:
   - component: {fileID: 9099933443532356241}
   - component: {fileID: 2167994078442512447}
   - component: {fileID: 1000328104156248003}
-  - component: {fileID: 3709715154851347691}
   m_Layer: 0
   m_Name: MainCube
   m_TagString: Player
@@ -130,6 +129,13 @@ MonoBehaviour:
   gravityModifier: 2
   jumpForce: 1126
   cubeSpeed: 100
+  inputInfo: {fileID: 0}
+  z: 0
+  left: 0
+  right: 0
+  up: 0
+  down: 0
+  space: 0
   isOnGround: 1
 --- !u!114 &1000328104156248003
 MonoBehaviour:
@@ -150,23 +156,7 @@ MonoBehaviour:
   OwnershipTransfer: 0
   observableSearch: 0
   ObservedComponents:
-  - {fileID: 3709715154851347691}
+  - {fileID: 0}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
---- !u!114 &3709715154851347691
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3709715154851347690}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 64179f3720bbfe947b7724caa67b7c1d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SynchronizeVelocity: 1
-  m_SynchronizeAngularVelocity: 0
-  m_TeleportEnabled: 0
-  m_TeleportIfDistanceGreaterThan: 3

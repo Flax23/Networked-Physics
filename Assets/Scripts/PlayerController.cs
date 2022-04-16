@@ -19,14 +19,15 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     [SerializeField]
     private float cubeSpeed;
 
-    public Text inputInfo;
+    [SerializeField]
+    private Text inputInfo;
     public bool z = false;
-    public bool left = false;
-    public bool right = false;
-    public bool up = false;
-    public bool down = false;
-    public bool space = false;
-    public bool isOnGround = true;
+    private bool left = false;
+    private bool right = false;
+    private bool up = false;
+    private bool down = false;
+    private bool space = false;
+    private bool isOnGround = true;
     private float forwardInput;
     private float horizontalInput;
     private Color cubeStartColor = new Color(43, 41, 41, 1);
@@ -38,27 +39,15 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     }
 
     void FixedUpdate()
-    {
-        forwardInput = Input.GetAxis("Vertical");
-        horizontalInput = Input.GetAxis("Horizontal");
+    {       
+        inputFlag();
 
-        cubeRb.AddForce(Vector3.forward * cubeSpeed * forwardInput, ForceMode.Impulse);
-        cubeRb.AddForce(Vector3.right * cubeSpeed * horizontalInput, ForceMode.Impulse);
-           
-        if (Input.GetKey(KeyCode.Space)) space = true;
-        else if (!Input.GetKey(KeyCode.Space) && photonView.IsMine == true) space = false;
+        if (photonView.IsMine == true) forwardInput = Input.GetAxis("Vertical");
+        if (photonView.IsMine == true) horizontalInput = Input.GetAxis("Horizontal");
 
-        if (Input.GetKey(KeyCode.Z)) z = true;
-        else if (!Input.GetKey(KeyCode.Z) && photonView.IsMine == true) z = false;
-
-        if (horizontalInput < 0 && photonView.IsMine == true) { left = true; right = false; }
-        else if (horizontalInput > 0 && photonView.IsMine == true) { left = false; right = true; }
-        else if (horizontalInput == 0 && photonView.IsMine == true) { left = false; right = false; }
-
-        if (forwardInput < 0 && photonView.IsMine == true) { down = true; up = false; }
-        else if (forwardInput > 0 && photonView.IsMine == true) { down = false; up = true; }
-        else if (forwardInput == 0 && photonView.IsMine == true) { down = false; up = false; }
-
+        if (up || down) cubeRb.AddForce(Vector3.forward * cubeSpeed * forwardInput, ForceMode.Impulse);       
+        if (left || right) cubeRb.AddForce(Vector3.right * cubeSpeed * horizontalInput, ForceMode.Impulse);
+      
         if (space && isOnGround)
         {
             cubeRb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
@@ -67,6 +56,25 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 
         inputInfo.text = "Z - " + z + "\nLeft - " + left + "\nRight - " + right + "\nUp - " + up + "\nDown - " + down +
             "\nSpace - " + space;
+    }
+
+    private void inputFlag()
+    {
+        if (Input.GetKey(KeyCode.Space)) space = true;
+        else if (!Input.GetKey(KeyCode.Space) && photonView.IsMine == true) space = false;
+
+        if (Input.GetKey(KeyCode.Z)) z = true;
+        else if (!Input.GetKey(KeyCode.Z) && photonView.IsMine == true) z = false;
+
+       
+
+        if (horizontalInput < 0 && photonView.IsMine == true) { left = true; right = false; }
+        else if (horizontalInput > 0 && photonView.IsMine == true) { left = false; right = true; }
+        else if (horizontalInput == 0 && photonView.IsMine == true) { left = false; right = false; }
+
+        if (forwardInput < 0 && photonView.IsMine == true) { down = true; up = false; }
+        else if (forwardInput > 0 && photonView.IsMine == true) { down = false; up = true; }
+        else if (forwardInput == 0 && photonView.IsMine == true) { down = false; up = false; }
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -103,6 +111,8 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
             stream.SendNext(up);
             stream.SendNext(down);
             stream.SendNext(space);
+            stream.SendNext(forwardInput);
+            stream.SendNext(horizontalInput);
 
         }
         else
@@ -114,6 +124,8 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
             this.up = (bool)stream.ReceiveNext();
             this.down = (bool)stream.ReceiveNext();
             this.space = (bool)stream.ReceiveNext();
+            this.forwardInput = (float)stream.ReceiveNext();
+            this.horizontalInput = (float)stream.ReceiveNext();
         }
     }
 
